@@ -77,6 +77,11 @@ public class imuTest extends LinearOpMode
                 Drive(1, 2500, 1000);
                 break;
         }
+
+
+
+        turn(135);
+        Drive(1, 3000, 0);
     }
 
 
@@ -138,10 +143,12 @@ public class imuTest extends LinearOpMode
 
         imu.initialize(parameters);
 
-
-
         while (!isStopRequested() && !imu.isGyroCalibrated())
             idle();
+
+
+
+        setupDetector();
 
         telemetry.addData("Robot Ready! IMU Status: ", imu.getCalibrationStatus());
         telemetry.update();
@@ -166,23 +173,16 @@ public class imuTest extends LinearOpMode
 
     public void setupDetector()
     {
-        telemetry.addData("Status", "Lets get that bread!");
+        detector = new GoldAlignDetector();
+        detector.init(hardwareMap.appContext, CameraViewDisplay.getInstance());
+        detector.useDefaults();
 
-        // Set up detector
-        detector = new GoldAlignDetector(); // Create detector
-        detector.init(hardwareMap.appContext, CameraViewDisplay.getInstance()); // Initialize it with the app context and camera
-        detector.useDefaults(); // Set detector to use default settings
-
-        // Optional tuning
-        detector.alignSize = 100; // How wide (in pixels) is the range in which the gold object will be aligned. (Represented by green bars in the preview)
-        detector.alignPosOffset = 0; // How far from center frame to offset this alignment zone.
-        detector.downscale = 0.4; // How much to downscale the input frames
+        detector.alignSize = 100;
+        detector.alignPosOffset = 0;
+        detector.downscale = 0.4;
 
         detector.areaScoringMethod = DogeCV.AreaScoringMethod.MAX_AREA;
-        detector.maxAreaScorer.weight = 0.005; //
-
-        detector.ratioScorer.weight = 5; //
-        detector.ratioScorer.perfectRatio = 1.0; // Ratio adjustment
+        detector.maxAreaScorer.weight = 0.005;
 
         detector.enable();
     }
