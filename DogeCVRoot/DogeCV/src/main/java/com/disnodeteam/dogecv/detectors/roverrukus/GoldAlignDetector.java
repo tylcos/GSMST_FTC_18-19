@@ -199,24 +199,4 @@ public class GoldAlignDetector extends DogeCVDetector {
     public boolean isFound() {
         return found;
     }
-
-    /**
-     * Returns the current position of the cheese, for team 2993
-     * @return a int (left = 0, middle = 1, right = 2) of where the cheese is
-     * @since
-     */
-    public int getCheesePosition()
-    {
-        double x = getXPosition();
-
-        int pos = 1;
-        if (!isFound())
-            pos = 0;
-        else if (x < 320)
-            pos = 1;
-        else if (x >= 320)
-            pos = 2;
-
-        return pos;
-    }
 }

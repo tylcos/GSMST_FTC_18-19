@@ -49,7 +49,7 @@ public class AutonomousIMUDepotDrop extends LinearOpMode
         SetLift(.5d, 4000);
         Drive(.5d, 400 , 500);
 
-        int cheesePos = detector.getCheesePosition();
+        int cheesePos = getCheesePosition();
         telemetry.addData("?Cheese Donde ESTA¿  " , cheesePos); // Gold X position.
         telemetry.update();
         wait(5000);
@@ -201,6 +201,20 @@ public class AutonomousIMUDepotDrop extends LinearOpMode
         return angles.firstAngle;
     }
 
+    public int getCheesePosition()
+    {
+        double x = detector.getXPosition();
+
+        int pos = 1;
+        if (!detector.isFound())
+            pos = 0;
+        else if (x < 320)
+            pos = 1;
+        else if (x >= 320)
+            pos = 2;
+
+        return pos;
+    }
 
     public void wait (int ms)
     {
