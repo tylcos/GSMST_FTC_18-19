@@ -15,11 +15,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
 
 
-@Autonomous(name="IMU Test Turning", group="test")
-public class imuTest extends LinearOpMode
+@Autonomous(name="IMU Depot Drop", group="depot")
+public class AutonomousIMUDepotDrop extends LinearOpMode
 {
+    public boolean debug = false;
+
     public double turnSpeed = .6d;
-    public double threshold = 2d;
+    public double turnThreshold = 1d;
 
 
 
@@ -42,87 +44,97 @@ public class imuTest extends LinearOpMode
 
 
 
-        robot.lift.setPower(.5);
-        wait(4000);
-        robot.lift.setPower(0);
+        // Drop down, drive forward to unhook, get cheese position
 
-        Drive(1, 400 , 500);
+        SetLift(.5d, 4000);
+        Drive(.5d, 400 , 500);
 
-        int cheesePos = 1;
-        if (!detector.isFound())
-            cheesePos = 0;
-        else if (detector.getXPosition() < 320)
-            cheesePos = 1;
-        else if (detector.getXPosition() >= 320)
-            cheesePos = 2;
-        wait(5000);
-
-        turn(90);
-
+        int cheesePos = detector.getCheesePosition();
         telemetry.addData("?Cheese Donde ESTA¿  " , cheesePos); // Gold X position.
         telemetry.update();
+        wait(5000);
+
+
+
+        // Turn to face depot, follow path for where the cheese currently is
+
+        Turn(90, 500);
+
         switch (cheesePos)
         {
             case 0:
             case 2:
                 int direction = cheesePos == 0 ? 1 : -1;
 
-                turn(30 * direction);
-                Drive(1, 1750, 1000);
-                turn(-60 * direction);
-                Drive(1, 1500, 1000);
-                turn(30 * direction);
+                Turn(30 * direction, 500);
+                Drive(.5d, 1750, 1000);
+                Turn(-60 * direction, 500);
+                Drive(.5d, 1500, 1000);
+                Turn(30 * direction, 500);
                 break;
+
             case 1:
-                Drive(1, 2500, 1000);
+                Drive(.5d, 2500, 1000);
                 break;
         }
 
 
 
-        turn(135);
+        // Drop team marker, turn to crater, drive to crater
+
+        SetIntake(.5d, 2000);
+        Turn(135, 500);
         Drive(1, 3000, 0);
     }
 
 
 
-    private double getAngle()
+    public void Drive(double speed, int time, int extraWait)
     {
-        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-        double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
-
-        if (deltaAngle < -180)
-            deltaAngle += 360;
-        else if (deltaAngle > 180)
-            deltaAngle -= 360;
-
-        globalAngle += deltaAngle;
-        lastAngles = angles;
-
-        return angles.firstAngle;
+        robot.Drive(speed, speed);
+        wait(time);
+        
+        robot.stop();
+        wait(extraWait);
     }
 
-
-
-    private void turn(double angle)
+    private void Turn(double angle, int extraWait)
     {
         globalAngle = 0;
 
         double dif;
-        while (Math.abs(dif = (angle - globalAngle)) > threshold && !isStopRequested())
+        while (Math.abs(dif = (angle - globalAngle)) > turnThreshold && !opModeIsActive())
         {
+            getAngle();
             double sign = Math.signum(dif);
             robot.fL.setPower(turnSpeed * sign);
             robot.fR.setPower(-turnSpeed * sign);
 
-            telemetry.addData("Current angle: ", getAngle());
-            telemetry.addData("Target angle: ", angle);
-            telemetry.addData("Gloabal angle: ", globalAngle);
-            telemetry.update();
+            if (debug)
+            {
+                telemetry.addData("Current angle: ", getAngle());
+                telemetry.addData("Target angle: ", angle);
+                telemetry.addData("Global angle: ", globalAngle);
+                telemetry.update();
+            }
         }
 
         robot.stop();
+        wait(extraWait);
+    }
+
+    public void SetLift(double speed, int time)
+    {
+        robot.lift.setPower(speed);
+        wait(time);
+        robot.lift.setPower(0);
+    }
+
+    public void SetIntake(double speed, int time)
+    {
+        robot.intake.setPower(speed);
+        wait(time);
+        robot.intake.setPower(0);
     }
 
 
@@ -154,26 +166,9 @@ public class imuTest extends LinearOpMode
         telemetry.update();
     }
 
-    public void Drive(int direction, int time, int extraWait)
-    {
-        robot.Drive(.5 * direction, .5 * direction);
-        wait(time);
-        robot.Drive(0d);
-        wait(extraWait);
-    }
-
-
-
-    public void wait (int ms)
-    {
-        timer.reset();
-        while (timer.time() < ms && opModeIsActive())
-            idle();
-    }
-
     public void setupDetector()
     {
-        detector = new GoldAlignDetector();
+        detector = new GoldAlignDetector(false);
         detector.init(hardwareMap.appContext, CameraViewDisplay.getInstance());
         detector.useDefaults();
 
@@ -185,5 +180,32 @@ public class imuTest extends LinearOpMode
         detector.maxAreaScorer.weight = 0.005;
 
         detector.enable();
+    }
+
+
+
+    private double getAngle()
+    {
+        Orientation angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+
+        double deltaAngle = angles.firstAngle - lastAngles.firstAngle;
+
+        if (deltaAngle < -180)
+            deltaAngle += 360;
+        else if (deltaAngle > 180)
+            deltaAngle -= 360;
+
+        globalAngle += deltaAngle;
+        lastAngles = angles;
+
+        return angles.firstAngle;
+    }
+
+
+    public void wait (int ms)
+    {
+        timer.reset();
+        while (timer.time() < ms && opModeIsActive())
+            idle();
     }
 }

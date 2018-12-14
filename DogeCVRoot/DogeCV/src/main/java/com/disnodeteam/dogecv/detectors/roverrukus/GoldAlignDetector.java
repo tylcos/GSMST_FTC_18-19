@@ -61,6 +61,12 @@ public class GoldAlignDetector extends DogeCVDetector {
         detectorName = "Gold Align Detector"; // Set the detector name
     }
 
+    public GoldAlignDetector(boolean debugEnabled) {
+        super();
+        detectorName = "Gold Align Detector"; // Set the detector name
+        debugAlignment = debugEnabled;
+    }
+
 
     @Override
     public Mat process(Mat input) {
@@ -118,13 +124,6 @@ public class GoldAlignDetector extends DogeCVDetector {
             // Draw center point
             Imgproc.circle(displayMat, new Point( xPos, bestRect.y + (bestRect.height / 2)), 5, new Scalar(0,255,0),2);
 
-            // Check if the mineral is aligned
-            if(xPos < alignXMax && xPos > alignXMin){
-                aligned = true;
-            }else{
-                aligned = false;
-            }
-
             // Draw Current X
             Imgproc.putText(displayMat,"Current X: " + bestRect.x,new Point(10,getAdjustedSize().height - 10),0,0.5, new Scalar(255,255,255),1);
             found = true;
@@ -132,6 +131,7 @@ public class GoldAlignDetector extends DogeCVDetector {
             found = false;
             aligned = false;
         }
+
         if(debugAlignment){
 
             //Draw debug alignment info
@@ -198,5 +198,25 @@ public class GoldAlignDetector extends DogeCVDetector {
      */
     public boolean isFound() {
         return found;
+    }
+
+    /**
+     * Returns the current position of the cheese, for team 2993
+     * @return a int (left = 0, middle = 1, right = 2) of where the cheese is
+     * @since
+     */
+    public int getCheesePosition()
+    {
+        double x = getXPosition();
+
+        int pos = 1;
+        if (!isFound())
+            pos = 0;
+        else if (x < 320)
+            pos = 1;
+        else if (x >= 320)
+            pos = 2;
+
+        return pos;
     }
 }
