@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.team2993;
+package org.firstinspires.ftc.team2993.Autonomous;
 
 import com.disnodeteam.dogecv.CameraViewDisplay;
 import com.disnodeteam.dogecv.DogeCV;
@@ -13,13 +13,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+import org.firstinspires.ftc.team2993.*;
 
 
-@Autonomous(name="IMU Depot Drop", group="depot")
-public class AutonomousIMUDepotDrop extends LinearOpMode
+
+@Autonomous(name="Auto - Crater Drop2", group="Crater")
+public class AutonomousCraterDrop extends LinearOpMode
 {
     public boolean debug = false;
 
+    public double driveSpeed = .5d;
     public double turnSpeed = .6d;
     public double turnThreshold = 1d;
 
@@ -47,7 +50,7 @@ public class AutonomousIMUDepotDrop extends LinearOpMode
         // Drop down, drive forward to unhook, get cheese position
 
         SetLift(.5d, 4000);
-        Drive(.5d, 400 , 500);
+        Drive(driveSpeed, 400 , 500);
 
         int cheesePos = getCheesePosition();
         telemetry.addData("?Cheese Donde ESTA¿  " , cheesePos); // Gold X position.
@@ -56,7 +59,7 @@ public class AutonomousIMUDepotDrop extends LinearOpMode
 
 
 
-        // Turn to face depot, follow path for where the cheese currently is
+        // Turn to face crater, follow path for where the cheese currently is, return to center
 
         Turn(90, 500);
 
@@ -67,24 +70,33 @@ public class AutonomousIMUDepotDrop extends LinearOpMode
                 int direction = cheesePos == 0 ? 1 : -1;
 
                 Turn(30 * direction, 500);
-                Drive(.5d, 1750, 1000);
-                Turn(-60 * direction, 500);
-                Drive(.5d, 1500, 1000);
-                Turn(30 * direction, 500);
+                Drive(driveSpeed, 1750, 1000);
+                Drive(-driveSpeed, 1750, 1000);
+                Turn(30 * -direction, 500);
                 break;
 
             case 1:
-                Drive(.5d, 2500, 1000);
+                Drive(driveSpeed, 1500, 1000);
+                Drive(-driveSpeed, 1500, 1000);
                 break;
         }
+
+
+
+        // Drive past crater and go to depot
+
+        Turn(50, 500);
+        Drive(driveSpeed, 3000, 500);
+        Turn(85, 500);
+        Drive(driveSpeed, 5000, 500);
 
 
 
         // Drop team marker, turn to crater, drive to crater
 
         SetIntake(.5d, 2000);
-        Turn(135, 500);
-        Drive(1, 3000, 0);
+        Turn(-45, 500);
+        Drive(-driveSpeed, 3000, 0);
     }
 
 
