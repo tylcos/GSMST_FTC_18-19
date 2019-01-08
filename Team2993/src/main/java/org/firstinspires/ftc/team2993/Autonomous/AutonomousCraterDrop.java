@@ -17,14 +17,14 @@ import org.firstinspires.ftc.team2993.*;
 
 
 
-@Autonomous(name="Auto - Crater Drop2", group="Crater")
+@Autonomous(name="Auto - Crater Drop", group="Crater")
 public class AutonomousCraterDrop extends LinearOpMode
 {
     public boolean debug = false;
 
-    public double driveSpeed = .5d;
-    public double turnSpeed = .6d;
-    public double turnThreshold = 1d;
+    public final double driveSpeed = .5d;
+    public final double turnSpeed = .6d;
+    public final double turnThreshold = 1d;
 
 
 
@@ -50,18 +50,18 @@ public class AutonomousCraterDrop extends LinearOpMode
         // Drop down, drive forward to unhook, get cheese position
 
         SetLift(.5d, 4000);
-        Drive(driveSpeed, 400 , 500);
+        Drive(driveSpeed, 400 , 250);
 
         int cheesePos = getCheesePosition();
         telemetry.addData("?Cheese Donde ESTA¿  " , cheesePos); // Gold X position.
         telemetry.update();
-        wait(5000);
+        wait(250);
 
 
 
         // Turn to face crater, follow path for where the cheese currently is, return to center
 
-        Turn(90, 500);
+        Turn(85, 100);
 
         switch (cheesePos)
         {
@@ -69,15 +69,19 @@ public class AutonomousCraterDrop extends LinearOpMode
             case 2:
                 int direction = cheesePos == 0 ? 1 : -1;
 
-                Turn(30 * direction, 500);
-                Drive(driveSpeed, 1750, 1000);
-                Drive(-driveSpeed, 1750, 1000);
-                Turn(30 * -direction, 500);
+                Turn(25 * direction, 100);
+                Drive(driveSpeed, 1600, 100);
+                //Turn(25 * direction, 0);
+                //Turn(25 * -direction, 0);
+                Drive(-driveSpeed, 1600, 100);
+                Turn(25 * -direction, 100);
+                Drive(driveSpeed, 250, 100);
                 break;
 
             case 1:
-                Drive(driveSpeed, 1500, 1000);
-                Drive(-driveSpeed, 1500, 1000);
+                wait(500);
+                Drive(driveSpeed, 1500, 250);
+                Drive(-driveSpeed, 1000, 250);
                 break;
         }
 
@@ -85,18 +89,17 @@ public class AutonomousCraterDrop extends LinearOpMode
 
         // Drive past crater and go to depot
 
-        Turn(50, 500);
-        Drive(driveSpeed, 3000, 500);
-        Turn(85, 500);
-        Drive(driveSpeed, 5000, 500);
+        Turn(70, 250);
+        Drive(driveSpeed, 2250, 250);
+        Turn(50, 250);
+        Drive(driveSpeed, 3000, 250);
 
 
 
         // Drop team marker, turn to crater, drive to crater
 
         SetIntake(.5d, 2000);
-        Turn(-45, 500);
-        Drive(-driveSpeed, 3000, 0);
+        Drive(-driveSpeed, 6000, 0);
     }
 
 
@@ -105,7 +108,7 @@ public class AutonomousCraterDrop extends LinearOpMode
     {
         robot.Drive(speed, speed);
         wait(time);
-        
+
         robot.stop();
         wait(extraWait);
     }
@@ -115,7 +118,7 @@ public class AutonomousCraterDrop extends LinearOpMode
         globalAngle = 0;
 
         double dif;
-        while (Math.abs(dif = (angle - globalAngle)) > turnThreshold && !opModeIsActive())
+        while (Math.abs(dif = (angle - globalAngle)) > turnThreshold && !isStopRequested())
         {
             getAngle();
             double sign = Math.signum(dif);
@@ -174,22 +177,22 @@ public class AutonomousCraterDrop extends LinearOpMode
 
         setupDetector();
 
-        telemetry.addData("Robot Ready! IMU Status: ", imu.getCalibrationStatus());
+        telemetry.addData("****** Robot Ready! IMU Status: ", imu.getCalibrationStatus());
         telemetry.update();
     }
 
     public void setupDetector()
     {
-        detector = new GoldAlignDetector(false);
+        detector = new GoldAlignDetector(debug);
         detector.init(hardwareMap.appContext, CameraViewDisplay.getInstance());
         detector.useDefaults();
 
-        detector.alignSize = 100;
+        detector.alignSize = 20;
         detector.alignPosOffset = 0;
         detector.downscale = 0.4;
 
         detector.areaScoringMethod = DogeCV.AreaScoringMethod.MAX_AREA;
-        detector.maxAreaScorer.weight = 0.005;
+        detector.perfectAreaScorer.weight = 0.005;
 
         detector.enable();
     }

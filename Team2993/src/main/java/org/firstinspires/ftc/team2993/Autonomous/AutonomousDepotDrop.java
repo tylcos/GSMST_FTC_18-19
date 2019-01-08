@@ -17,13 +17,13 @@ import org.firstinspires.ftc.team2993.*;
 
 
 
-@Autonomous(name="Auto - Depot Drop2", group="Depot")
+@Autonomous(name="Auto - Depot Drop", group="Depot")
 public class AutonomousDepotDrop extends LinearOpMode
 {
-    public boolean debug = false;
+    public final boolean debug = false;
 
-    public double turnSpeed = .6d;
-    public double turnThreshold = 1d;
+    public final double turnSpeed = .6d;
+    public final double turnThreshold = 1d;
 
 
 
@@ -49,18 +49,18 @@ public class AutonomousDepotDrop extends LinearOpMode
         // Drop down, drive forward to unhook, get cheese position
 
         SetLift(.5d, 4000);
-        Drive(.5d, 400 , 500);
+        Drive(.5d, 250 , 1000);
 
         int cheesePos = getCheesePosition();
         telemetry.addData("?Cheese Donde ESTA¿  " , cheesePos); // Gold X position.
         telemetry.update();
-        wait(5000);
+        wait(1000);
 
 
 
         // Turn to face depot, follow path for where the cheese currently is
 
-        Turn(90, 500);
+        Turn(90, 0);
 
         switch (cheesePos)
         {
@@ -70,13 +70,14 @@ public class AutonomousDepotDrop extends LinearOpMode
 
                 Turn(30 * direction, 500);
                 Drive(.5d, 1750, 1000);
-                Turn(-60 * direction, 500);
-                Drive(.5d, 1500, 1000);
-                Turn(30 * direction, 500);
+                Turn(-57 * direction, 500);
+                Drive(.5d, 1750, 1000);
+                Turn(27 * direction, 500);
                 break;
 
             case 1:
-                Drive(.5d, 2500, 1000);
+                wait(500);
+                Drive(.5d, 3000, 1000);
                 break;
         }
 
@@ -85,8 +86,10 @@ public class AutonomousDepotDrop extends LinearOpMode
         // Drop team marker, turn to crater, drive to crater
 
         SetIntake(.5d, 2000);
-        Turn(-45, 500);
-        Drive(-1, 3000, 0);
+        Turn(-65, 100);
+        Drive(-.5, 1000, 100);
+        Turn(15, 500);
+        Drive(-.5, 4000, 0);
     }
 
 
@@ -105,7 +108,7 @@ public class AutonomousDepotDrop extends LinearOpMode
         globalAngle = 0;
 
         double dif;
-        while (Math.abs(dif = (angle - globalAngle)) > turnThreshold && !opModeIsActive())
+        while (Math.abs(dif = (angle - globalAngle)) > turnThreshold && !isStopRequested())
         {
             getAngle();
             double sign = Math.signum(dif);
@@ -206,6 +209,7 @@ public class AutonomousDepotDrop extends LinearOpMode
     public int getCheesePosition()
     {
         double x = detector.getXPosition();
+        telemetry.addData("Cheese spot: ", x);
 
         int pos = 1;
         if (!detector.isFound())
@@ -221,7 +225,7 @@ public class AutonomousDepotDrop extends LinearOpMode
     public void wait (int ms)
     {
         timer.reset();
-        while (timer.time() < ms && opModeIsActive())
+        while (timer.time() < ms && opModeIsActive() && !isStopRequested())
             idle();
     }
 }

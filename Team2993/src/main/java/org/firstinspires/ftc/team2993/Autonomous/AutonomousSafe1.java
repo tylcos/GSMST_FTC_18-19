@@ -27,7 +27,6 @@ public class AutonomousSafe1 extends LinearOpMode
         robot.Drive(-1d);
         wait(4000);
         robot.Drive(0d);
-
     }
 
 
